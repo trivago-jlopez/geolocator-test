@@ -25,6 +25,8 @@ KINESIS_OUTPUT_STREAM?=consolidation-geocoder-output-dev
 ifeq ($(ENV), production)
 	OWNER=$(TEAM)
 	STACK_NAME_SUFFIX=$(ENV)
+	KINESIS_INPUT_STREAM=inventory--matchbox-streams--content.accommodation.candidate--prod
+    KINESIS_OUTPUT_STREAM=consolidation-geocoder-output-dev
 else
 	ENV=development
 	OWNER=$(USER)
