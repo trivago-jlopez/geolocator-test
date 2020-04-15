@@ -40,6 +40,7 @@ jobs:
       continue-on-error: false
       run: |
         export AWS_DEFAULT_REGION=eu-west-1
+        export AWS_CONFIG_FILE=~/.aws/config
         make test
     - name: Deploy Resources
       id: resources
