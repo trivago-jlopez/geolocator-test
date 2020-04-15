@@ -7,12 +7,14 @@ Parameters:
     Description: The name of the owner
   Environment:
     Type: String
-  KinesisInputStream:
+  KinesisInputStreamProd:
     Type: String
     Description: Name of the Kinesis stream for candidate accommodations
-  KinesisOutputStream:
+    Default: inventory--matchbox-streams--content.accommodation.candidate--prod
+  KinesisOutputStreamProd:
     Type: String
     Description: Name of the Kinesis stream for geocoded candidate accommodations
+    Default: consolidation-geolocator-output-prod
   SecretName:
     Type: String
     Description: Geolocator pipeline sensitiveinfo secret name for CE account.
@@ -23,10 +25,8 @@ Parameters:
     Default: 184771037180
 
 Conditions:
-  ProdEnvironment:
-    Fn::Equals:
-      - Ref: Environment
-      - production
+  IsProdDeployment: !Equals [ !Ref Environment, production]
+  IsNotProdDeployment: !Not [ Condition: IsProdDeployment ]
 
 
 Resources:
@@ -37,6 +37,19 @@ Resources:
         Fn::Sub: ${AWS::StackName}_deadletter
       VisibilityTimeout: 300
 
+  kinesisInputStreamDev:
+    Type: AWS::Kinesis::Stream
+    Condition: IsNotProdDeployment
+    Properties:
+      RetentionPeriodHours: 24
+      ShardCount: 1
+
+  kinesisOutputStreamDev:
+    Type: AWS::Kinesis::Stream
+    Condition: IsNotProdDeployment
+    Properties:
+      RetentionPeriodHours: 24
+      ShardCount: 1
 
   ConsumerLambdaRole:
     Type: AWS::IAM::Role
@@ -65,8 +78,10 @@ Resources:
                   - kinesis:DescribeStream
                   - kinesis:GetShardIterator
                   - kinesis:GetRecords
-                Resource:
-                  - !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisInputStream}
+                Resource: !If
+                  - IsProdDeployment
+                  - !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisInputStreamProd}
+                  - !GetAtt kinesisInputStreamDev.Arn
               - Effect: Allow
                 Action:
                   - sqs:SendMessage
@@ -106,7 +121,10 @@ Resources:
         Record:
           Type: Kinesis
           Properties:
-            Stream: !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisInputStream}
+            Stream: !If
+              - IsProdDeployment
+              - !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisInputStreamProd}
+              - !GetAtt kinesisInputStreamDev.Arn
             StartingPosition: LATEST
             BatchSize: 100
       Handler: router.consumer.lambda_handler
@@ -119,7 +137,7 @@ Resources:
 
   ConsumerLambdaLiveErrorAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: ProdEnvironment
+    Condition: IsProdDeployment
     Properties:
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
@@ -174,7 +192,7 @@ Resources:
                   - execute-api:Invoke
                 Resource:
                   !If
-                    - ProdEnvironment
+                    - IsProdDeployment
                     - !Sub arn:aws:execute-api:${AWS::Region}:${HotelProfilingAccountID}:{{resolve:secretsmanager:${SecretName}:SecretString:api_id}}/prod/GET/locate
                     - !Sub arn:aws:execute-api:${AWS::Region}:${HotelProfilingAccountID}:{{resolve:secretsmanager:${SecretName}:SecretString:api_id}}/dev/GET/locate
               - Effect: Allow
@@ -195,7 +213,7 @@ Resources:
           API_ID: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:api_id}}"
           API_KEY:
             !If
-              - ProdEnvironment
+              - IsProdDeployment
               - !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:citylocator_api_key_prod}}"
               - !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:citylocator_api_key_dev}}"
           TRANSFER_TABLE: !Ref TransferTable
@@ -216,7 +234,7 @@ Resources:
 
   LocatorLambdaLiveErrorAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: ProdEnvironment
+    Condition: IsProdDeployment
     Properties:
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
@@ -282,7 +300,10 @@ Resources:
                 Action:
                   - kinesis:PutRecord
                   - kinesis:PutRecords
-                Resource: !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisOutputStream}
+                Resource: !If
+                  - IsProdDeployment
+                  - !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisOutputStreamProd}
+                  - !GetAtt kinesisOutputStreamDev.Arn
 
 
   StreamerLambda:
@@ -295,7 +316,10 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Ref Environment
-          STREAM_CANDIDATE_GEO_DATA: !Ref KinesisOutputStream
+          STREAM_CANDIDATE_GEO_DATA: !If
+            - IsProdDeployment
+            - !Ref KinesisOutputStreamProd
+            - !Ref kinesisOutputStreamDev
       Events:
         Transfer:
           Type: DynamoDB
@@ -311,7 +335,7 @@ Resources:
 
   StreamerLambdaLiveErrorAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: ProdEnvironment
+    Condition: IsProdDeployment
     Properties:
       ComparisonOperator: GreaterThanThreshold
       Dimensions:

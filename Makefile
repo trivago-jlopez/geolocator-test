@@ -11,8 +11,6 @@ PROJECT=geolocator
 ACCOUNT=311937351692
 REGION=eu-west-1
 ENV?=development
-KINESIS_INPUT_STREAM?=consolidation-geocoder-input-dev
-KINESIS_OUTPUT_STREAM?=consolidation-geocoder-output-dev
 
 # GITHUB_ACTIONS is set only in github actions environment.
 # Deployment to prod is not allowed outside github actions
@@ -25,8 +23,6 @@ KINESIS_OUTPUT_STREAM?=consolidation-geocoder-output-dev
 ifeq ($(ENV), production)
 	OWNER=$(TEAM)
 	STACK_NAME_SUFFIX=$(ENV)
-	KINESIS_INPUT_STREAM=inventory--matchbox-streams--content.accommodation.candidate--prod
-    KINESIS_OUTPUT_STREAM=consolidation-geolocator-output-prod
 else
 	ENV=development
 	OWNER=$(USER)
@@ -124,9 +120,6 @@ deploy:
 			Owner=$(OWNER) \
 			LogLevel=$(LOGGER) \
 			DeploymentBucket=$(BUILD_BUCKET) \
-			KinesisInputStream=$(KINESIS_INPUT_STREAM) \
-			KinesisOutputStream=$(KINESIS_OUTPUT_STREAM)
-
 		--tags Pillar=$(PILLAR) Domain=$(DOMAIN) Team=$(TEAM) Project=$(PROJECT) Owner=$(OWNER) Environment=$(ENV)
 
 release: flake8 test build package deploy
