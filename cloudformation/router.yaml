@@ -1,0 +1,326 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Router component of the Consolidation GeoLocator Pipeline
+Parameters:
+  Owner:
+    Type: String
+    Description: The name of the owner
+  Environment:
+    Type: String
+  KinesisInputStream:
+    Type: String
+    Description: Name of the Kinesis stream for candidate accommodations
+  KinesisOutputStream:
+    Type: String
+    Description: Name of the Kinesis stream for geocoded candidate accommodations
+  SecretName:
+    Type: String
+    Description: Geolocator pipeline sensitiveinfo secret name for CE account.
+    Default: consolidation/geolocator
+  HotelProfilingAccountID:
+    Type: String
+    Description: AWS Account ID of the Hotel Profiling Team
+    Default: 184771037180
+
+Conditions:
+  ProdEnvironment:
+    Fn::Equals:
+      - Ref: Environment
+      - production
+
+
+Resources:
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName:
+        Fn::Sub: ${AWS::StackName}_deadletter
+      VisibilityTimeout: 300
+
+
+  ConsumerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - ${StackName}--consumer-role
+        - { StackName: !Ref "AWS::StackName" }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kinesis:DescribeStream
+                  - kinesis:GetShardIterator
+                  - kinesis:GetRecords
+                Resource:
+                  - !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisInputStream}
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:SendMessageBatch
+                Resource:
+                  - !GetAtt DeadLetterQueue.Arn
+                  - Fn::ImportValue: !Sub geolocator-geocode-${Owner}-${Environment}--QueueArn
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                  - dynamodb:PutItem
+                  - dynamodb:BatchWriteItem
+                Resource:
+                  - !GetAtt TransferTable.Arn
+                  - Fn::ImportValue: !Sub geolocator-geocode-${Owner}-${Environment}--TableArn
+
+
+  ConsumerLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub
+        - ${StackName}--consumer
+        - { StackName: !Ref "AWS::StackName" }
+      CodeUri: ../_build
+      DeadLetterQueue:
+        Type: SQS
+        TargetArn: !GetAtt DeadLetterQueue.Arn
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          GEOCODES_TABLE:
+            Fn::ImportValue: !Sub geolocator-geocode-${Owner}-${Environment}--TableName
+          GEOCODER_QUEUE:
+            Fn::ImportValue: !Sub geolocator-geocode-${Owner}-${Environment}--QueueUrl
+          TRANSFER_TABLE: !Ref TransferTable
+      Events:
+        Record:
+          Type: Kinesis
+          Properties:
+            Stream: !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisInputStream}
+            StartingPosition: LATEST
+            BatchSize: 100
+      Handler: router.consumer.lambda_handler
+      MemorySize: 256
+      ReservedConcurrentExecutions: 2
+      Role: !GetAtt ConsumerLambdaRole.Arn
+      Runtime: python3.7
+      Timeout: 300
+
+
+  ConsumerLambdaLiveErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ProdEnvironment
+    Properties:
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ConsumerLambda
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+      TreatMissingData: ignore
+
+
+  LocatorLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - ${StackName}--locator-role
+        - { StackName: !Ref "AWS::StackName" }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kinesis:DescribeStream
+                  - kinesis:GetShardIterator
+                  - kinesis:GetRecords
+                Resource:
+                  - Fn::ImportValue: !Sub geolocator-consolidator-${Owner}-${Environment}--OutputStreamArn
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                  - dynamodb:UpdateItem
+                Resource:
+                  - !GetAtt TransferTable.Arn
+              - Effect: Allow
+                Action:
+                  - execute-api:Invoke
+                Resource:
+                  !If
+                    - ProdEnvironment
+                    - !Sub arn:aws:execute-api:${AWS::Region}:${HotelProfilingAccountID}:{{resolve:secretsmanager:${SecretName}:SecretString:api_id}}/prod/GET/locate
+                    - !Sub arn:aws:execute-api:${AWS::Region}:${HotelProfilingAccountID}:{{resolve:secretsmanager:${SecretName}:SecretString:api_id}}/dev/GET/locate
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: "*"
+
+  LocatorLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub
+        - ${StackName}--locator
+        - { StackName: !Ref "AWS::StackName" }
+      CodeUri: ../_build
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          API_ID: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:api_id}}"
+          API_KEY:
+            !If
+              - ProdEnvironment
+              - !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:citylocator_api_key_prod}}"
+              - !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:citylocator_api_key_dev}}"
+          TRANSFER_TABLE: !Ref TransferTable
+      Events:
+        Record:
+          Type: Kinesis
+          Properties:
+            Stream:
+              Fn::ImportValue: !Sub geolocator-consolidator-${Owner}-${Environment}--OutputStreamArn
+            StartingPosition: TRIM_HORIZON
+            BatchSize: 100
+      Handler: router.locator.lambda_handler
+      MemorySize: 256
+      Role: !GetAtt LocatorLambdaRole.Arn
+      Runtime: python3.7
+      Timeout: 60
+
+
+  LocatorLambdaLiveErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ProdEnvironment
+    Properties:
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LocatorLambda
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+      TreatMissingData: ignore
+
+
+  TransferTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: entity
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: entity
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      TimeToLiveSpecification:
+        AttributeName: timestamp
+        Enabled: true
+
+
+  StreamerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - ${StackName}--streamer-role
+        - { StackName: !Ref "AWS::StackName" }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetShardIterator
+                  - dynamodb:GetRecords
+                  - dynamodb:ListStreams
+                Resource:
+                - !GetAtt TransferTable.StreamArn
+              - Effect: Allow
+                Action:
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
+                Resource: !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisOutputStream}
+
+
+  StreamerLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub
+        - ${StackName}--streamer
+        - { StackName: !Ref "AWS::StackName" }
+      CodeUri: ../_build
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          STREAM_CANDIDATE_GEO_DATA: !Ref KinesisOutputStream
+      Events:
+        Transfer:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt TransferTable.StreamArn
+            StartingPosition: TRIM_HORIZON
+            BatchSize: 100
+      Handler: router.streamer.lambda_handler
+      Role: !GetAtt StreamerLambdaRole.Arn
+      Runtime: python3.7
+      Timeout: 60
+
+
+  StreamerLambdaLiveErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ProdEnvironment
+    Properties:
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref StreamerLambda
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+      TreatMissingData: ignore

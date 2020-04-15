@@ -1,0 +1,4 @@
+jsonschema == 2.6.0
+ngram == 3.3.2
+pg8000 == 1.11.0
+rollbar

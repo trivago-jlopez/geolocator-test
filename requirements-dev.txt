@@ -1,0 +1,7 @@
+awscli
+geocoder == 1.36.0
+pytest == 3.7.4
+pytest-mock
+pytest-cov == 2.5.1
+pytest-env == 0.6.2
+moto == 1.3.4

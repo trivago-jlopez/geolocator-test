@@ -1,0 +1,201 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: GeoCode component of the Consolidation GeoLocator Pipeline
+
+Parameters:
+  Owner:
+    Type: String
+    Description: The name of the owner
+  Environment:
+    Type: String
+  SecretName:
+    Type: String
+    Description: Geolocator pipeline sensitive info secret ID for CE account.
+    Default: consolidation/geolocator
+  GeocoderApiKeys:
+    Type: String
+    Description: Key Name for Geocode API
+    Default: geocoder_api_key
+
+
+Conditions:
+  ProdEnvironment:
+    Fn::Equals:
+      - !Ref Environment
+      - production
+
+
+Resources:
+  PrimaryGeocoderQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}-primary
+      VisibilityTimeout: 300
+
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}-deadletter
+
+
+  RescheduleQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}-reschedule
+      VisibilityTimeout: 300
+
+  GeocoderTable:
+    Type: AWS::DynamoDB::Table
+    # DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub
+        - ${StackName}--geocoder-table
+        - { StackName: !Ref "AWS::StackName" }
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: "entity"
+          AttributeType: "S"
+        - AttributeName: "provider"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "entity"
+          KeyType: "HASH"
+        - AttributeName: "provider"
+          KeyType: "RANGE"
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      TimeToLiveSpecification:
+        AttributeName: timestamp
+        Enabled: true
+
+  GeocoderLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - ${StackName}--geocoder-role
+        - { StackName: !Ref "AWS::StackName" }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-access-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                  - dynamodb:PutItem
+                  - dynamodb:BatchWriteItem
+                Resource:
+                  - !GetAtt GeocoderTable.Arn
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:SendMessageBatch
+                  - sqs:GetQueueUrl
+                Resource:
+                  - !GetAtt RescheduleQueue.Arn
+              - Effect: Allow
+                Action:
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                  - sqs:ReceiveMessage
+                Resource:
+                  - !GetAtt PrimaryGeocoderQueue.Arn
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                Resource:
+                  - !GetAtt DeadLetterQueue.Arn
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: arn:aws:secretsmanager:eu-west-1:311937351692:secret:consolidation/geolocator-ICy5fy
+
+
+  GeocoderLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${GeocoderLambda}
+
+
+  GeocoderLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub
+        - ${StackName}--geocoder
+        - { StackName: !Ref "AWS::StackName" }
+      CodeUri: ../_build
+      DeadLetterQueue:
+        Type: SQS
+        TargetArn: !GetAtt DeadLetterQueue.Arn
+      Environment:
+        Variables:
+          TABLE: !Ref GeocoderTable
+          QUEUE: !GetAtt RescheduleQueue.QueueName
+          ENVIRONMENT: !Ref Environment
+          SECRET_NAME: !Ref SecretName
+          GEOCODER_API_KEYS: !Ref GeocoderApiKeys
+      Events:
+        PrimaryQueueMessage:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PrimaryGeocoderQueue.Arn
+            BatchSize: 10
+      Handler: geocode.main.lambda_handler
+      Role: !GetAtt GeocoderLambdaRole.Arn
+      Runtime: python3.7
+      Timeout: 300
+      ReservedConcurrentExecutions: 4
+
+
+  GeocoderLambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ProdEnvironment
+    Properties:
+      # AlarmActions:
+      #   - arn:aws:sns:eu-west-1:184771037180:world-notification
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref GeocoderLambda
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+      TreatMissingData: ignore
+
+
+Outputs:
+  TableName:
+    Value: !Ref GeocoderTable
+    Export:
+      Name: !Sub geolocator-geocode-${Owner}-${Environment}--TableName
+  TableArn:
+    Value: !GetAtt GeocoderTable.Arn
+    Export:
+      Name: !Sub geolocator-geocode-${Owner}-${Environment}--TableArn
+  OutputStreamArn:
+    Value: !GetAtt GeocoderTable.StreamArn
+    Export:
+      Name: !Sub geolocator-geocode-${Owner}-${Environment}--OutputStreamArn
+  PrimaryQueueArn:
+    Value: !GetAtt PrimaryGeocoderQueue.Arn
+    Export:
+      Name: !Sub geolocator-geocode-${Owner}-${Environment}--QueueArn
+  PrimaryQueueUrl:
+    Value: !Ref PrimaryGeocoderQueue
+    Export:
+      Name: !Sub geolocator-geocode-${Owner}-${Environment}--QueueUrl

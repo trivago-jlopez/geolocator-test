@@ -1,0 +1,157 @@
+arcgis:
+  requested:
+    - house_number
+    - street
+    - city
+    - country_code
+  arbitrary:
+    - region
+    - postal_code
+    - district
+
+
+bing:
+  requested:
+    - house_number
+    - street
+    - city
+    - country_code
+  arbitrary:
+    - postal_code
+    - district
+  mapping:
+    addressLine:
+      - house_number
+      - street
+    locality: city
+    adminDistrict: district
+    postalCode: postal_code
+    countryRegion: country_code
+
+
+google:
+  requested:
+    - house_number
+    - street
+    - city
+    - country_code
+  arbitrary:
+    - guess
+    - region
+    - postal_code
+  mapping:
+    address:
+      - house_number
+      - street
+    locality: city
+    postal_code: postal_code
+    administrative_area: region
+    country: country_code
+
+
+google_places:
+  requested:
+    - name
+    - city
+    - country_code
+  arbitrary:
+    - guess
+    - region
+    - postal_code
+  mapping:
+    address: name
+    locality: city
+    postal_code: postal_code
+    administrative_area: region
+    country: country_code
+
+
+here:
+  requested:
+    - house_number
+    - street
+    - city
+    - country_code
+  arbitrary:
+    - guess
+    - region
+    - postal_code
+    - district
+  mapping:
+    street:
+      - house_number
+      - street
+    city: city
+    district: district
+    postalcode: postal_code
+    state: region
+    country: country_code
+
+
+mapbox:
+  requested:
+    - house_number
+    - street
+    - city
+    - country_code
+  arbitrary:
+    - guess
+    - region
+    - postal_code
+    - district
+
+
+mapquest:
+  requested:
+    - house_number
+    - street
+    - city
+    - country_code
+  arbitrary:
+    - guess
+    - region
+    - postal_code
+    - district
+
+
+osm:
+  requested:
+    - house_number
+    - street
+    - city
+    - country_code
+  arbitrary:
+    - guess
+    - region
+    - postal_code
+    - country
+  mapping:
+    street:
+      - house_number
+      - street
+    city: city
+    postalcode: postal_code
+    state: region
+    country: country
+    countrycodes: country_code
+
+
+tomtom:
+  requested:
+    - house_number
+    - street
+    - city
+    - country_code
+  arbitrary:
+    - guess
+    - region
+    - postal_code
+    - district
+
+
+geonames:
+  requested:
+    - city
+    - country_code
+  arbitrary:
+    - guess

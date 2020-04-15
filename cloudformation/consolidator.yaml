@@ -1,0 +1,239 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Consolidator component of the Consolidation GeoLocator Pipeline
+
+Parameters:
+  Owner:
+    Type: String
+    Description: The name of the owner
+  Environment:
+    Type: String
+    Default: test
+
+Conditions:
+  ProdEnvironment:
+    Fn::Equals:
+      - !Ref Environment
+      - production
+
+
+Resources:
+  ListenerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - ${StackName}--listener-role
+        - { StackName: !Ref "AWS::StackName" }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetShardIterator
+                  - dynamodb:GetRecords
+                  - dynamodb:ListStreams
+                Resource:
+                  - Fn::ImportValue: !Sub geolocator-geocode-${Owner}-${Environment}--OutputStreamArn
+              -
+                Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:SendMessageBatch
+                  - sqs:GetQueueUrl
+                Resource:
+                  - !GetAtt ConsolidatorQueue.Arn
+              - Effect: Allow
+                Action:
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
+                Resource: !GetAtt ConsolidatorStream.Arn
+
+  ListenerLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub
+        - ${StackName}--listener
+        - { StackName: !Ref "AWS::StackName" }
+      CodeUri: ../_build
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          INPUT_QUEUE: !Ref ConsolidatorQueue
+          OUTPUT_STREAM: !Ref ConsolidatorStream
+      Events:
+        GeocodeWrite:
+          Type: DynamoDB
+          Properties:
+            Stream:
+              Fn::ImportValue: !Sub geolocator-geocode-${Owner}-${Environment}--OutputStreamArn
+            StartingPosition: TRIM_HORIZON
+            BatchSize: 1000
+      Handler: consolidator.listener.lambda_handler
+      Role: !GetAtt ListenerLambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 60
+
+
+  ListenerLambdaLiveErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ProdEnvironment
+    Properties:
+      # AlarmActions:
+      #   - arn:aws:sns:eu-west-1:184771037180:world-notification
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ListenerLambda
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+      TreatMissingData: ignore
+
+
+  ConsolidatorQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}_primary
+      VisibilityTimeout: 300
+
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}_deadletter
+
+
+  ConsolidatorLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - ${StackName}--consolidator-role
+        - { StackName: !Ref "AWS::StackName" }
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                  - sqs:ReceiveMessage
+                Resource:
+                  - !GetAtt ConsolidatorQueue.Arn
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                Resource:
+                  - !GetAtt DeadLetterQueue.Arn
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                  - dynamodb:Query
+                  - dynamodb:BatchWriteItem
+                Resource:
+                  - Fn::ImportValue: !Sub geolocator-geocode-${Owner}-${Environment}--TableArn
+
+
+  ConsolidatorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ConsolidatorLambda}
+
+
+  ConsolidatorLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub
+        - ${StackName}--consolidator
+        - { StackName: !Ref "AWS::StackName" }
+      CodeUri: ../_build
+      DeadLetterQueue:
+        Type: SQS
+        TargetArn: !GetAtt DeadLetterQueue.Arn
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          GEOCODES_TABLE:
+            Fn::ImportValue: !Sub geolocator-geocode-${Owner}-${Environment}--TableName
+          GEOCODER_RULESET_VERSION: 20180823
+          PARTNER_RULESET_VERSION: 20180823
+      Events:
+        TaskMessage:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ConsolidatorQueue.Arn
+            BatchSize: 10
+      Handler: consolidator.main.lambda_handler
+      MemorySize: 512
+      ReservedConcurrentExecutions: 8
+      Role: !GetAtt ConsolidatorLambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
+
+
+  ConsolidatorLambdaLiveErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ProdEnvironment
+    Properties:
+      # AlarmActions:
+      #   - arn:aws:sns:eu-west-1:184771037180:world-notification
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ConsolidatorLambda
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+      TreatMissingData: ignore
+
+
+  ConsolidatorStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      RetentionPeriodHours: 24
+      ShardCount: 1
+
+
+Outputs:
+  InputQueueArn:
+    Value: !GetAtt ConsolidatorQueue.Arn
+    Export:
+      Name: !Sub geolocator-consolidator-${Owner}-${Environment}--InputQueueArn
+  OutputStreamArn:
+    Value: !GetAtt ConsolidatorStream.Arn
+    Export:
+      Name: !Sub geolocator-consolidator-${Owner}-${Environment}--OutputStreamArn

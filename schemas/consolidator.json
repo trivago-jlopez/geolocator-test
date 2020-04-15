@@ -1,0 +1,43 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "object",
+    "oneOf": [
+        {
+            "properties": {
+                "entity_id": {
+                    "type": "number"
+                },
+                "entity_type": {
+                    "type": "string",
+                    "enum": ["accommodation", "reference_accommodation", "candidate_accommodation"]
+                },
+                "batch_id": {
+                    "type": ["string", "null"]
+                }
+            },
+            "required": [
+                "entity_id",
+                "entity_type"
+            ],
+            "additionalProperties": false
+        },{
+            "properties": {
+                "entity_id": {
+                    "type": "number"
+                },
+                "entity_type": {
+                    "type": "string",
+                    "enum": ["point_of_interest", "candidate_point_of_interest"]
+                },
+                "batch_id": {
+                    "type": ["string", "null"]
+                }
+            },
+            "required": [
+                "entity_id",
+                "entity_type"
+            ],
+            "additionalProperties": false
+        }
+    ]
+}

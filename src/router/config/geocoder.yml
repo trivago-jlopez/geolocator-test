@@ -1,0 +1,12 @@
+accommodation:
+  - google
+  - google_places
+  - osm
+  #- tomtom
+  - arcgis
+candidate_accommodation:
+  - google
+  - google_places
+  - osm
+  - tomtom
+  - arcgis

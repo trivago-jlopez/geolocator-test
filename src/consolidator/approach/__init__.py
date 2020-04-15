@@ -1,0 +1,1 @@
+from .accommodation import AccommodationConsolidator

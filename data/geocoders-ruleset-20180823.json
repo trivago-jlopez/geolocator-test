@@ -1,0 +1,377 @@
+{
+  "schema": {
+    "fields": [
+      "provider",
+      "accuracy",
+      "confidence",
+      "quality",
+      "score",
+      "country_code"
+    ],
+    "required": [
+      "provider"
+    ],
+    "filter": [
+      "country_code"
+    ]
+  },
+  "rules": [
+    {
+      "quality": "0.9",
+      "confidence": null,
+      "provider": "mapbox",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "100",
+      "accuracy": null
+    },
+    {
+      "quality": "yes",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.7"
+    },
+    {
+      "quality": "yes",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.8"
+    },
+    {
+      "quality": "yes",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.9"
+    },
+    {
+      "quality": "1.0",
+      "confidence": null,
+      "provider": "mapbox",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "house",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.8"
+    },
+    {
+      "quality": "house",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.9"
+    },
+    {
+      "quality": "Address",
+      "confidence": "9.0",
+      "provider": "bing",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "yes",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.6"
+    },
+    {
+      "quality": null,
+      "confidence": "9.0",
+      "provider": "here",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "Point Address",
+      "confidence": "10.0",
+      "provider": "tomtom",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "0.8",
+      "confidence": null,
+      "provider": "mapbox",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "0.9",
+      "confidence": null,
+      "provider": "mapbox",
+      "score": null,
+      "accuracy": "interpolated"
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "98",
+      "accuracy": null
+    },
+    {
+      "quality": "political",
+      "confidence": "9.0",
+      "provider": "google",
+      "score": null,
+      "accuracy": "ROOFTOP"
+    },
+    {
+      "quality": "yes",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.5"
+    },
+    {
+      "quality": "StreetAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "100",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "10.0",
+      "provider": "arcgis",
+      "score": "100",
+      "accuracy": null
+    },
+    {
+      "quality": "house",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.5"
+    },
+    {
+      "quality": "0.6",
+      "confidence": "9.0",
+      "provider": "mapbox",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "99",
+      "accuracy": null
+    },
+    {
+      "quality": "house",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.6"
+    },
+    {
+      "quality": "Address",
+      "confidence": "7.0",
+      "provider": "bing",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "0.6",
+      "confidence": "8.0",
+      "provider": "mapbox",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "house",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.7"
+    },
+    {
+      "quality": "POINT",
+      "confidence": null,
+      "provider": "mapquest",
+      "score": null,
+      "accuracy": null
+    },
+    {
+      "quality": "house",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.4"
+    },
+    {
+      "quality": "StreetAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "99",
+      "accuracy": null
+    },
+    {
+      "quality": "1.0",
+      "confidence": null,
+      "provider": "mapbox",
+      "score": null,
+      "accuracy": "interpolated"
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "96",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "97",
+      "accuracy": null
+    },
+    {
+      "quality": "yes",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.4"
+    },
+    {
+      "quality": "residential",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.7"
+    },
+    {
+      "quality": "residential",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.8"
+    },
+    {
+      "quality": "residential",
+      "confidence": "9.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.5"
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "93",
+      "accuracy": null
+    },
+    {
+      "quality": "residential",
+      "confidence": "10.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.6"
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "95",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "10.0",
+      "provider": "arcgis",
+      "score": "99",
+      "accuracy": null
+    },
+    {
+      "quality": "residential",
+      "confidence": "9.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.6"
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "94",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "92",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "91",
+      "accuracy": null
+    },
+    {
+      "quality": "residential",
+      "confidence": "9.0",
+      "provider": "osm",
+      "score": null,
+      "accuracy": "0.7"
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "88",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "85",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "10.0",
+      "provider": "arcgis",
+      "score": "97",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "89",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "90",
+      "accuracy": null
+    },
+    {
+      "quality": "PointAddress",
+      "confidence": "9.0",
+      "provider": "arcgis",
+      "score": "87",
+      "accuracy": null
+    }
+  ]
+}

@@ -1,0 +1,559 @@
+{
+  "schema": {
+    "fields": [
+      "provider",
+      "country_code"
+    ],
+    "required": [
+      "provider"
+    ],
+    "filter": [
+      "country_code"
+    ]
+  },
+  "rules": [
+    {
+      "provider": "mhs_salzburg"
+    },
+    {
+      "provider": "mhs_hoernerdoerfer"
+    },
+    {
+      "provider": "mhs_oberstaufen"
+    },
+    {
+      "provider": "Elumbus"
+    },
+    {
+      "provider": "TFE_Travelodge"
+    },
+    {
+      "provider": "mhs_CaesarData"
+    },
+    {
+      "provider": "cm_capcorn"
+    },
+    {
+      "provider": "Accor_Adagio_Access"
+    },
+    {
+      "provider": "mhs_HotelNetSolu"
+    },
+    {
+      "provider": "mhs_synxis"
+    },
+    {
+      "provider": "SnowTrex"
+    },
+    {
+      "provider": "mhs_Tomas"
+    },
+    {
+      "provider": "EurostarsDirectConnect"
+    },
+    {
+      "provider": "Accor_adagio"
+    },
+    {
+      "provider": "CHC_Econo_Lodge"
+    },
+    {
+      "provider": "CHA_Comfort_Inn"
+    },
+    {
+      "provider": "SWNA_W Hotels"
+    },
+    {
+      "provider": "Leonardo"
+    },
+    {
+      "provider": "Mirai"
+    },
+    {
+      "provider": "BestWestern_US"
+    },
+    {
+      "provider": "G6_Motel6"
+    },
+    {
+      "provider": "CHA_Econo_Lodge"
+    },
+    {
+      "provider": "Eurostars"
+    },
+    {
+      "provider": "CHD_Econo_Lodge"
+    },
+    {
+      "provider": "cm_base7booking"
+    },
+    {
+      "provider": "CHD_Rodeway_Inn"
+    },
+    {
+      "provider": "CHD_Comfort_Inn"
+    },
+    {
+      "provider": "CHD_Sleep_Inn"
+    },
+    {
+      "provider": "CHD_Quality_Inn"
+    },
+    {
+      "provider": "CHD_ComfortSuite"
+    },
+    {
+      "provider": "CHC_Comfort_Inn"
+    },
+    {
+      "provider": "CHC_Quality_Inn"
+    },
+    {
+      "provider": "Marriott_Delta Hotels"
+    },
+    {
+      "provider": "CHD_Ascend"
+    },
+    {
+      "provider": "mhs_SimpleBookin"
+    },
+    {
+      "provider": "CHD_Suburban"
+    },
+    {
+      "provider": "hotelsnl"
+    },
+    {
+      "provider": "Destination Florence"
+    },
+    {
+      "provider": "NordicChoice"
+    },
+    {
+      "provider": "Marriott_Autograph Collection"
+    },
+    {
+      "provider": "CHA_Quality_Inn"
+    },
+    {
+      "provider": "CHD_Cambria"
+    },
+    {
+      "provider": "Triverna"
+    },
+    {
+      "provider": "CHD_Mainstay"
+    },
+    {
+      "provider": "CHD_Clarion"
+    },
+    {
+      "provider": "Marriott_AC Hotels"
+    },
+    {
+      "provider": "CHI_ComfortInn"
+    },
+    {
+      "provider": "jackrabbit"
+    },
+    {
+      "provider": "ihg_indigo"
+    },
+    {
+      "provider": "HotelTonight"
+    },
+    {
+      "provider": "Accor_SuiteNovo"
+    },
+    {
+      "provider": "DerbyIndividual"
+    },
+    {
+      "provider": "CHI_Quality"
+    },
+    {
+      "provider": "mhs_BookAssist"
+    },
+    {
+      "provider": "JTB Hawaii"
+    },
+    {
+      "provider": "Vacatia.com"
+    },
+    {
+      "provider": "Marriott_Springhill Suites"
+    },
+    {
+      "provider": "Marriott_Towne Place Suites"
+    },
+    {
+      "provider": "Marriott_Courtyard"
+    },
+    {
+      "provider": "Marriott_Residence Inn"
+    },
+    {
+      "provider": "Accor_IbisStyles"
+    },
+    {
+      "provider": "eholiday.pl"
+    },
+    {
+      "provider": "Marriott_Fairfield Inn & Suites"
+    },
+    {
+      "provider": "TiCaTi"
+    },
+    {
+      "provider": "HotusaGroup"
+    },
+    {
+      "provider": "SWNA_Westin"
+    },
+    {
+      "provider": "Extended Stay"
+    },
+    {
+      "provider": "cm_fnsRooms"
+    },
+    {
+      "provider": "SWNA_Sheraton"
+    },
+    {
+      "provider": "Justaway(Eurotours)"
+    },
+    {
+      "provider": "ihg_candlewood"
+    },
+    {
+      "provider": "ViajesElCorteIngles_v2"
+    },
+    {
+      "provider": "MontigoV2"
+    },
+    {
+      "provider": "Accor_Mercure"
+    },
+    {
+      "provider": "Caesars"
+    },
+    {
+      "provider": "ihg_StayBridge"
+    },
+    {
+      "provider": "SWNA_FourPoints"
+    },
+    {
+      "provider": "Marriott_Marriott Hotels & Resorts"
+    },
+    {
+      "provider": "Abreu"
+    },
+    {
+      "provider": "TouricoLastminuteTravel"
+    },
+    {
+      "provider": "Accor_IBIS"
+    },
+    {
+      "provider": "tourico"
+    },
+    {
+      "provider": "mhs_Feratel"
+    },
+    {
+      "provider": "pw_Aldi-Utazas"
+    },
+    {
+      "provider": "ihg_hiexpress"
+    },
+    {
+      "provider": "Rakuten_Int hotels"
+    },
+    {
+      "provider": "Hotels4Everyone"
+    },
+    {
+      "provider": "WIHP"
+    },
+    {
+      "provider": "Stayforlong"
+    },
+    {
+      "provider": "ihg_holidayInn"
+    },
+    {
+      "provider": "Bed&Snow"
+    },
+    {
+      "provider": "Odamax"
+    },
+    {
+      "provider": "Travelclick"
+    },
+    {
+      "provider": "Hyatt"
+    },
+    {
+      "provider": "cm_kognitiv"
+    },
+    {
+      "provider": "101hotels.ru"
+    },
+    {
+      "provider": "Occupancy"
+    },
+    {
+      "provider": "makemytrip_int"
+    },
+    {
+      "provider": "In-Italia"
+    },
+    {
+      "provider": "esky.pl v2"
+    },
+    {
+      "provider": "Accor_IbisBudget"
+    },
+    {
+      "provider": "Yamsafer"
+    },
+    {
+      "provider": "ThomasCookBEPW"
+    },
+    {
+      "provider": "alpharoomsV2"
+    },
+    {
+      "provider": "GuletPeakwork"
+    },
+    {
+      "provider": "hotelopia"
+    },
+    {
+      "provider": "Tui Peakwork AT"
+    },
+    {
+      "provider": "neckermann_be"
+    },
+    {
+      "provider": "migros_ferien"
+    },
+    {
+      "provider": "Despegar_BR"
+    },
+    {
+      "provider": "despegar"
+    },
+    {
+      "provider": "Hotelwiz"
+    },
+    {
+      "provider": "Travelocity USv2"
+    },
+    {
+      "provider": "HotwireV2"
+    },
+    {
+      "provider": "ebookers_ews"
+    },
+    {
+      "provider": "orbitzusv2"
+    },
+    {
+      "provider": "Wotif"
+    },
+    {
+      "provider": "HolidayMe"
+    },
+    {
+      "provider": "expediav2"
+    },
+    {
+      "provider": "lastminute.com.au"
+    },
+    {
+      "provider": "Tui CH"
+    },
+    {
+      "provider": "Netflights"
+    },
+    {
+      "provider": "Al_Mosafer"
+    },
+    {
+      "provider": "Onlyhotels"
+    },
+    {
+      "provider": "VoyagesSNCFv2"
+    },
+    {
+      "provider": "priceline_sub"
+    },
+    {
+      "provider": "Marriott_Renaissance Hotels"
+    },
+    {
+      "provider": "neckermann_nl"
+    },
+    {
+      "provider": "Homeaway"
+    },
+    {
+      "provider": "otel.com V2"
+    },
+    {
+      "provider": "Booking.com"
+    },
+    {
+      "provider": "VRBO"
+    },
+    {
+      "provider": "Bedfinder"
+    },
+    {
+      "provider": "OstrovokV2"
+    },
+    {
+      "provider": "Hotels.comV2"
+    },
+    {
+      "provider": "ZenHotels"
+    },
+    {
+      "provider": "Roomer"
+    },
+    {
+      "provider": "HotelQuickly"
+    },
+    {
+      "provider": "roomsXXLv3"
+    },
+    {
+      "provider": "priceline"
+    },
+    {
+      "provider": "Airtours Peakwork V2"
+    },
+    {
+      "provider": "Splitty Travel"
+    },
+    {
+      "provider": "Tui Peakwork"
+    },
+    {
+      "provider": "AgodaV2"
+    },
+    {
+      "provider": "GetaRoom"
+    },
+    {
+      "provider": "Appleworld"
+    },
+    {
+      "provider": "hutchgo"
+    },
+    {
+      "provider": "TabletHotels"
+    },
+    {
+      "provider": "Initalia"
+    },
+    {
+      "provider": "Geostar"
+    },
+    {
+      "provider": "lol.travel"
+    },
+    {
+      "provider": "HotelPower"
+    },
+    {
+      "provider": "cancelon"
+    },
+    {
+      "provider": "Accor_Formule1"
+    },
+    {
+      "provider": "HostelworldV2"
+    },
+    {
+      "provider": "Sembo"
+    },
+    {
+      "provider": "Trip.com"
+    },
+    {
+      "provider": "Travelrepublic"
+    },
+    {
+      "provider": "Travelist"
+    },
+    {
+      "provider": "dnata"
+    },
+    {
+      "provider": "Roomdi"
+    },
+    {
+      "provider": "Prestigia"
+    },
+    {
+      "provider": "Amoma"
+    },
+    {
+      "provider": "Flixhotels"
+    },
+    {
+      "provider": "Travelgator"
+    },
+    {
+      "provider": "Hotelbook.ru"
+    },
+    {
+      "provider": "Hotelsclick"
+    },
+    {
+      "provider": "MountVacation"
+    },
+    {
+      "provider": "Signatours"
+    },
+    {
+      "provider": "laterooms"
+    },
+    {
+      "provider": "atrapalo_new"
+    },
+    {
+      "provider": "BestDay"
+    },
+    {
+      "provider": "ihg_crownePlaza"
+    },
+    {
+      "provider": "Preferred Hotels"
+    },
+    {
+      "provider": "splendia"
+    },
+    {
+      "provider": "adrialin"
+    },
+    {
+      "provider": "Onlyapartments"
+    },
+    {
+      "provider": "Hideaways"
+    },
+    {
+      "provider": "cm_Omnibees"
+    },
+    {
+      "provider": "adriagate"
+    },
+    {
+      "provider": "Nusatrip"
+    }
+  ]
+}

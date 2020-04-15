@@ -1,0 +1,208 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "object",
+    "oneOf": [
+        {
+            "properties": {
+                "provider": {
+                    "type": "string",
+                    "enum": ["google", "google_places", "baidu", "arcgis", "tomtom", "osm", "mapquest"]
+                },
+                "entity_id": {
+                    "type": "number"
+                },
+                "entity_type": {
+                    "type": "string",
+                    "enum": ["accommodation", "reference_accommodation", "candidate_accommodation"]
+                },
+                "batch_id": {
+                    "type": ["string", "null"]
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "street": {
+                            "type": "string"
+                        },
+                        "house_number": {
+                            "type": "string"
+                        },
+                        "district": {
+                            "type": "string"
+                        },
+                        "city": {
+                            "type": "string"
+                        },
+                        "region": {
+                            "type": "string"
+                        },
+                        "postal_code": {
+                            "type": "string"
+                        },
+                        "country": {
+                            "type": "string"
+                        },
+                        "country_code": {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
+                        },
+                        "guess": {
+                            "type": "object",
+                            "properties": {
+                                "longitude": {
+                                    "type": "number",
+                                    "minimum": -180.0,
+                                    "maximum": 180.0
+                                },
+                                "latitude": {
+                                    "type": "number",
+                                    "minimum": -90.0,
+                                    "maximum": 90.0
+                                } 
+                            }
+                        }
+                    },
+                    "required": ["city", "country_code"],
+                    "anyOf": [
+                        {
+                            "required": ["name"]
+                        },
+                        {
+                            "required": ["street"]
+                        }
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["entity_id", "entity_type", "provider", "address"],
+            "additionalProperties": false
+        },
+        {
+            "properties": {
+                "provider": {
+                    "type": "string",
+                    "enum": ["google", "geonames", "osm", "tomtom"]
+                },
+                "entity_id": {
+                    "type": "number"
+                },
+                "entity_type": {
+                    "type": "string",
+                    "enum": ["destination"]
+                },
+                "batch_id": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string"
+                        },
+                        "country_code": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z]{2}$"
+                        },
+                        "guess": {
+                            "type": "object",
+                            "properties": {
+                                "longitude": {
+                                    "type": "number",
+                                    "minimum": -180.0,
+                                    "maximum": 180.0
+                                },
+                                "latitude": {
+                                    "type": "number",
+                                    "minimum": -90.0,
+                                    "maximum": 90.0
+                                } 
+                            }
+                        }
+                    },
+                    "required": ["country_code", "city"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["entity_id", "entity_type", "provider", "address"],
+            "additionalProperties": false
+        },
+        {
+            "properties": {
+                "provider": {
+                    "type": "string",
+                    "enum": ["google", "google_places", "baidu", "arcgis", "tomtom", "osm", "mapquest"]
+                },
+                "entity_id": {
+                    "type": "number"
+                },
+                "entity_type": {
+                    "type": "string",
+                    "enum": ["point_of_interest", "reference_point_of_interest", "candidate_point_of_interest"]
+                },
+                "batch_id": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "street": {
+                            "type": "string"
+                        },
+                        "district": {
+                            "type": "string"
+                        },
+                        "city": {
+                            "type": "string"
+                        },
+                        "region": {
+                            "type": "string"
+                        },
+                        "postal_code": {
+                            "type": "string"
+                        },
+                        "country": {
+                            "type": "string"
+                        },
+                        "country_code": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z]{2}$"
+                        },
+                        "guess": {
+                            "type": "object",
+                            "properties": {
+                                "longitude": {
+                                    "type": "number",
+                                    "minimum": -180.0,
+                                    "maximum": 180.0
+                                },
+                                "latitude": {
+                                    "type": "number",
+                                    "minimum": -90.0,
+                                    "maximum": 90.0
+                                } 
+                            }
+                        }
+                    },
+                    "required": ["country_code"],
+                    "anyOf": [
+                        {
+                            "required": ["name"]
+                        },
+                        {
+                            "required": ["street"]
+                        }
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["entity_id", "entity_type", "provider", "address"],
+            "additionalProperties": false
+        }
+    ]
+}

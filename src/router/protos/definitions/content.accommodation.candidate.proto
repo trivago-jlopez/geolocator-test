@@ -1,0 +1,30 @@
+syntax = "proto2";
+
+package com.trivago.streaming.toolkit.proto.content.accommodation;
+
+option java_outer_classname = "candidateOuter";
+option java_package = "com.trivago.streaming.toolkit.proto.content.candidate";
+option go_package = "com.trivago.streaming.toolkit.proto.content.candidate";
+
+message candidate {
+    message PK {
+        optional uint32 candidate_id = 1;
+    }
+
+    optional PK key = 2;
+
+    optional string name = 3;
+    optional string street = 4;
+    optional string postal_code = 5;
+    optional string district = 6;
+    optional string city = 7;
+    optional string region = 8;
+    optional string country = 9;
+    optional double longitude = 10;
+    optional double latitude = 11;
+    optional Flag flag = 12;
+
+    message Flag {
+        optional bool is_valid_geocode = 1;
+    }
+}

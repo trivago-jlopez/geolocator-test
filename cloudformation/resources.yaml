@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Common resources required for the GeoLocator pipeline
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Environment on which the pipeline runs
+    AllowedValues:
+      - production
+      - staging
+      - development
+    ConstraintDescription: must specify production, staging or development.
+  Owner:
+    Type: String
+    Description: The name of the owner, used to separate the Glue scripts
+
+Resources:
+  TeamAlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub
+        - ${StackName}--alarms
+        - { StackName: !Ref "AWS::StackName" }
+      TopicName: !Sub
+        - ${StackName}--alarms-topic
+        - { StackName: !Ref "AWS::StackName" }
+
+Outputs:
+  TeamAlarmTopic:
+    Value: !Ref TeamAlarmTopic
+    Export:
+      Name: !Sub geolocator-resources-${Owner}-TeamAlarmTopic--${Environment}

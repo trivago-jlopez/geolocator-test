@@ -1,0 +1,10 @@
+jsonschema == 2.6.0
+geocoder == 1.36.0
+geopy == 1.11.0
+fuzzywuzzy == 0.16.0
+packaging
+ratelim == 0.1.6
+redis == 2.10.6
+pyyaml
+pytz == 2018.3
+rollbar

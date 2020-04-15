@@ -1,0 +1,25 @@
+syntax = "proto2";
+
+package com.trivago.streaming.toolkit.proto.content.accommodation;
+
+option java_outer_classname = "candidate_geo_dataOuter";
+option java_package = "com.trivago.streaming.toolkit.proto.content.candidate_geo_data";
+option go_package = "com.trivago.streaming.toolkit.proto.content.candidate_geo_data";
+
+message candidate_geo_data {
+    message PK {
+        optional uint32 candidate_id = 1;
+    }
+
+    optional PK key = 2;
+
+    optional uint32 locality_id = 3;
+    optional uint32 locality_ns = 4;
+    optional uint32 administrative_division_id = 5;
+    optional uint32 administrative_division_ns = 6;
+    optional uint32 country_id = 7;
+    optional uint32 country_ns = 8;
+    optional double longitude = 9;
+    optional double latitude = 10;
+    optional bool valid_geo_point = 11;
+}

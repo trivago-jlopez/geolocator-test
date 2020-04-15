@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: World domain geocoder component
+
+
+Resources:
+  PrimaryGeocoderQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}_primary
+      VisibilityTimeout: 300
+
+
+  SecondaryGeocoderQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}_secondary
+      VisibilityTimeout: 300
+
+
+  GeocoderTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      AttributeDefinitions:
+        -
+          AttributeName: "entity"
+          AttributeType: "S"
+        -
+          AttributeName: "provider"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "entity"
+          KeyType: "HASH"
+        -
+          AttributeName: "provider"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      TimeToLiveSpecification:
+        AttributeName: timestamp
+        Enabled: true
+
+
+Outputs:
+  TableName:
+    Value: !Ref GeocoderTable
+    Export:
+      Name: !Sub ${AWS::StackName}-TableName
+  TableArn:
+    Value: !GetAtt GeocoderTable.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-TableArn
+  PrimaryInputQueueArn:
+    Value: !GetAtt PrimaryGeocoderQueue.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-PrimaryInputQueueArn
+  PrimaryInputQueueUrl:
+    Value: !Ref PrimaryGeocoderQueue
+    Export:
+      Name: !Sub ${AWS::StackName}-PrimaryInputQueueUrl
+  SecondaryInputQueueArn:
+    Value: !GetAtt SecondaryGeocoderQueue.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-SecondaryInputQueueArn
+  SecondaryInputQueueUrl:
+    Value: !Ref SecondaryGeocoderQueue
+    Export:
+      Name: !Sub ${AWS::StackName}-SecondaryInputQueueUrl
