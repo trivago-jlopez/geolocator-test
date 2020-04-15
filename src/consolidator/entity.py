@@ -2,7 +2,6 @@ import abc
 import logging
 import os
 
-import boto3
 
 from consolidator import approach, candidate, logger
 from consolidator.utils import fetcher, helpers
