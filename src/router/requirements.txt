@@ -1,5 +1,5 @@
 ngram == 3.3.2
-protobuf == 3.6.1
+protobuf == 3.15.0
 protobuf3_to_dict == 0.1.5
 pyyaml == 3.13
 requests == 2.22.0
